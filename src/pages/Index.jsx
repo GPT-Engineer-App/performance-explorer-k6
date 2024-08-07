@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Cat, Heart, Info, Paw, Moon, Sun, Star, Coffee, Sparkles, Gift } from "lucide-react";
+import { Cat, Heart, Info, Paw, Moon, Sun, Star, Coffee, Sparkles, Gift, Brain, Smile, Frown, Meh, HelpCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,6 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Slider } from "@/components/ui/slider";
 
 const CatFact = ({ fact }) => (
   <motion.div
@@ -64,7 +66,53 @@ const Index = () => {
   const [catName, setCatName] = useState("");
   const [showNameDialog, setShowNameDialog] = useState(true);
   const [confettiActive, setConfettiActive] = useState(false);
+  const [quizActive, setQuizActive] = useState(false);
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [score, setScore] = useState(0);
+  const [catMood, setCatMood] = useState(50);
+  const [showCareDialog, setShowCareDialog] = useState(false);
   const { toast } = useToast();
+
+  const quizQuestions = [
+    {
+      question: "How many hours do cats typically sleep in a day?",
+      options: ["8-10 hours", "12-14 hours", "16-20 hours", "22-23 hours"],
+      correctAnswer: 2
+    },
+    {
+      question: "What is a group of cats called?",
+      options: ["A pride", "A clowder", "A pack", "A colony"],
+      correctAnswer: 1
+    },
+    {
+      question: "Which of these is NOT a recognized cat breed?",
+      options: ["Sphynx", "Munchkin", "Savannah", "Doberman"],
+      correctAnswer: 3
+    },
+    {
+      question: "What is the average lifespan of a domestic cat?",
+      options: ["5-8 years", "10-12 years", "13-17 years", "20-25 years"],
+      correctAnswer: 2
+    },
+    {
+      question: "Which sense is most developed in cats compared to humans?",
+      options: ["Sight", "Smell", "Hearing", "Taste"],
+      correctAnswer: 2
+    }
+  ];
+
+  const catCareTips = [
+    "Provide fresh water daily and clean the water bowl regularly.",
+    "Feed your cat a balanced diet appropriate for their age and health status.",
+    "Brush your cat's teeth regularly to prevent dental issues.",
+    "Provide scratching posts to keep their claws healthy and protect your furniture.",
+    "Regular vet check-ups are essential for maintaining your cat's health.",
+    "Keep the litter box clean and in a quiet, accessible location.",
+    "Spend time playing with your cat to provide mental and physical stimulation.",
+    "Groom your cat regularly, especially if they have long hair.",
+    "Create a safe indoor environment with plenty of hiding spots and high perches.",
+    "Consider microchipping your cat for identification in case they get lost."
+  ];
 
   useEffect(() => {
     document.body.classList.toggle("dark", isDarkMode);
@@ -103,8 +151,12 @@ const Index = () => {
     });
   };
 
+  useEffect(() => {
+    document.body.style.cursor = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='%23ff69b4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 5c.67 0 1.35.09 2 .26 1.78-2 5.03-2.84 6.42-2.26 1.4.58-.42 7-.42 7 .57 1.07 1 2.24 1 3.44C21 17.9 16.97 21 12 21s-9-3.1-9-7.56c0-1.25.5-2.4 1-3.44 0 0-1.89-6.42-.5-7 1.39-.58 4.72.23 6.5 2.23A9.04 9.04 0 0 1 12 5Z'/%3E%3Cpath d='M8 14v.5'/%3E%3Cpath d='M16 14v.5'/%3E%3Cpath d='M11.25 16.25h1.5L12 17l-.75-.75Z'/%3E%3C/svg%3E"), auto`;
+  }, []);
+
   return (
-    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gradient-to-b from-purple-100 to-pink-100'} p-8 transition-colors duration-300`}>
+    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100'} p-8 transition-colors duration-300`}>
       <div className="max-w-4xl mx-auto">
         <motion.div
           initial={{ opacity: 0 }}
@@ -115,6 +167,9 @@ const Index = () => {
           <Badge variant="outline" className="py-2">
             <Coffee className="mr-2 h-4 w-4" /> Facts Learned: {factCount}
           </Badge>
+          <Badge variant="outline" className="py-2">
+            <Brain className="mr-2 h-4 w-4" /> Quiz Score: {score}
+          </Badge>
           <Button
             onClick={toggleDarkMode}
             variant="outline"
@@ -122,6 +177,21 @@ const Index = () => {
             className="rounded-full"
           >
             {isDarkMode ? <Sun className="h-[1.2rem] w-[1.2rem]" /> : <Moon className="h-[1.2rem] w-[1.2rem]" />}
+          </Button>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1 }}
+          className="fixed top-4 left-4 z-50"
+        >
+          <Button
+            onClick={() => setShowCareDialog(true)}
+            variant="outline"
+            className="rounded-full"
+          >
+            <HelpCircle className="mr-2 h-4 w-4" /> Cat Care Tips
           </Button>
         </motion.div>
 
@@ -352,6 +422,118 @@ const Index = () => {
             {factCount} / 10 facts learned
           </p>
         </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2 }}
+          className="mt-8"
+        >
+          <h2 className="text-2xl font-semibold mb-4 text-center text-purple-700 dark:text-purple-300">{catName}'s Mood Tracker</h2>
+          <div className="flex items-center justify-center space-x-4">
+            <Frown className="text-red-500" size={24} />
+            <Slider
+              value={[catMood]}
+              onValueChange={(value) => setCatMood(value[0])}
+              max={100}
+              step={1}
+              className="w-64"
+            />
+            <Smile className="text-green-500" size={24} />
+          </div>
+          <p className="text-center mt-2 text-gray-600 dark:text-gray-400">
+            {catMood < 33 ? "Your cat seems unhappy. Try some playtime!" : 
+             catMood < 66 ? "Your cat is content. A treat might cheer them up!" : 
+             "Your cat is purr-fectly happy!"}
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.4 }}
+          className="mt-8 text-center"
+        >
+          <Button
+            onClick={() => setQuizActive(true)}
+            className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-full transition duration-300 ease-in-out transform hover:shadow-lg"
+          >
+            <Brain className="mr-2" /> Start Cat Quiz
+          </Button>
+        </motion.div>
+
+        <Dialog open={quizActive} onOpenChange={setQuizActive}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Cat Trivia Quiz</DialogTitle>
+              <DialogDescription>
+                Test your cat knowledge!
+              </DialogDescription>
+            </DialogHeader>
+            {currentQuestion < quizQuestions.length ? (
+              <>
+                <h3 className="text-lg font-semibold mb-4">{quizQuestions[currentQuestion].question}</h3>
+                <RadioGroup onValueChange={(value) => {
+                  if (parseInt(value) === quizQuestions[currentQuestion].correctAnswer) {
+                    setScore(score + 1);
+                  }
+                  if (currentQuestion < quizQuestions.length - 1) {
+                    setCurrentQuestion(currentQuestion + 1);
+                  } else {
+                    setQuizActive(false);
+                    toast({
+                      title: "Quiz Completed!",
+                      description: `You scored ${score + 1} out of ${quizQuestions.length}`,
+                      duration: 5000,
+                    });
+                    setCurrentQuestion(0);
+                    setScore(0);
+                  }
+                }}>
+                  {quizQuestions[currentQuestion].options.map((option, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      <RadioGroupItem value={index.toString()} id={`option-${index}`} />
+                      <Label htmlFor={`option-${index}`}>{option}</Label>
+                    </div>
+                  ))}
+                </RadioGroup>
+              </>
+            ) : (
+              <div className="text-center">
+                <h3 className="text-xl font-semibold mb-4">Quiz Completed!</h3>
+                <p className="text-lg mb-4">You scored {score} out of {quizQuestions.length}</p>
+                <Button onClick={() => {
+                  setQuizActive(false);
+                  setCurrentQuestion(0);
+                  setScore(0);
+                }}>Close</Button>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={showCareDialog} onOpenChange={setShowCareDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Cat Care Tips</DialogTitle>
+              <DialogDescription>
+                Essential tips for keeping your feline friend happy and healthy!
+              </DialogDescription>
+            </DialogHeader>
+            <ul className="list-disc pl-5 space-y-2">
+              {catCareTips.map((tip, index) => (
+                <motion.li
+                  key={index}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                >
+                  {tip}
+                </motion.li>
+              ))}
+            </ul>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
