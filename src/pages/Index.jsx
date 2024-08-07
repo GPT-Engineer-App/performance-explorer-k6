@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import { Cat, Heart, Info, Paw, Moon, Sun } from "lucide-react";
+import { Cat, Heart, Info, Paw, Moon, Sun, Star, Coffee } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { useToast } from "@/components/ui/use-toast";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 
 const CatFact = ({ fact }) => (
   <motion.div
@@ -13,9 +15,23 @@ const CatFact = ({ fact }) => (
     animate={{ opacity: 1, y: 0 }}
     exit={{ opacity: 0, y: -20 }}
     transition={{ duration: 0.5 }}
-    className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-6"
+    className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-6 relative overflow-hidden"
   >
+    <motion.div
+      className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-pink-500 to-purple-500"
+      initial={{ scaleX: 0 }}
+      animate={{ scaleX: 1 }}
+      transition={{ duration: 0.5, delay: 0.2 }}
+    />
     <p className="text-gray-800 dark:text-gray-200 text-lg font-medium">{fact}</p>
+    <motion.div
+      className="absolute bottom-2 right-2"
+      initial={{ scale: 0 }}
+      animate={{ scale: 1 }}
+      transition={{ duration: 0.3, delay: 0.5 }}
+    >
+      <Star className="text-yellow-400" size={20} />
+    </motion.div>
   </motion.div>
 );
 
@@ -41,6 +57,7 @@ const Index = () => {
   const [showFact, setShowFact] = useState(false);
   const [currentFact, setCurrentFact] = useState("");
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [factCount, setFactCount] = useState(0);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -51,6 +68,7 @@ const Index = () => {
     const randomFact = catFacts[Math.floor(Math.random() * catFacts.length)];
     setCurrentFact(randomFact);
     setShowFact(true);
+    setFactCount(prevCount => prevCount + 1);
     toast({
       title: "New Cat Fact!",
       description: "Did you know? Cats are fascinating creatures!",
@@ -66,15 +84,14 @@ const Index = () => {
     <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gradient-to-b from-purple-100 to-pink-100'} p-8 transition-colors duration-300`}>
       <div className="max-w-4xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="flex justify-between items-center mb-8"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1 }}
+          className="fixed top-4 right-4 z-50 flex items-center space-x-4"
         >
-          <h1 className="text-5xl font-bold text-purple-800 dark:text-purple-300 flex items-center">
-            <Cat className="mr-4 text-pink-600 dark:text-pink-400" size={48} />
-            Feline Fascination
-          </h1>
+          <Badge variant="outline" className="py-2">
+            <Coffee className="mr-2 h-4 w-4" /> Facts Learned: {factCount}
+          </Badge>
           <Button
             onClick={toggleDarkMode}
             variant="outline"
@@ -83,6 +100,30 @@ const Index = () => {
           >
             {isDarkMode ? <Sun className="h-[1.2rem] w-[1.2rem]" /> : <Moon className="h-[1.2rem] w-[1.2rem]" />}
           </Button>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-center mb-12"
+        >
+          <motion.h1 
+            className="text-6xl font-bold text-purple-800 dark:text-purple-300 flex items-center justify-center"
+            initial={{ scale: 0.5 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 260, damping: 20 }}
+          >
+            <Cat className="mr-4 text-pink-600 dark:text-pink-400" size={64} />
+            Feline Fascination
+          </motion.h1>
+          <motion.p 
+            className="text-xl mt-4 text-gray-600 dark:text-gray-400"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+          >
+            Explore the wonderful world of cats!
+          </motion.p>
         </motion.div>
 
         <Carousel className="mb-8">
@@ -186,18 +227,36 @@ const Index = () => {
           </TabsContent>
         </Tabs>
 
-        <div className="text-center">
-          <Button
-            onClick={handleShowFact}
-            className="bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-6 rounded-full transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg"
+        <div className="text-center mb-8">
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
-            <Heart className="mr-2" /> Show Cat Fact
-          </Button>
+            <Button
+              onClick={handleShowFact}
+              className="bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-6 rounded-full transition duration-300 ease-in-out transform hover:shadow-lg"
+            >
+              <Heart className="mr-2" /> Show Cat Fact
+            </Button>
+          </motion.div>
         </div>
 
         <AnimatePresence>
           {showFact && <CatFact fact={currentFact} />}
         </AnimatePresence>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1 }}
+          className="mt-8"
+        >
+          <h2 className="text-2xl font-semibold mb-4 text-center text-purple-700 dark:text-purple-300">Your Cat Knowledge Progress</h2>
+          <Progress value={factCount * 10} className="w-full h-4" />
+          <p className="text-center mt-2 text-gray-600 dark:text-gray-400">
+            {factCount} / 10 facts learned
+          </p>
+        </motion.div>
       </div>
     </div>
   );
