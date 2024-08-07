@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Cat, Heart, Info, Paw, Moon, Sun, Star, Coffee } from "lucide-react";
+import { Cat, Heart, Info, Paw, Moon, Sun, Star, Coffee, Sparkles, Gift } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,6 +8,9 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { useToast } from "@/components/ui/use-toast";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const CatFact = ({ fact }) => (
   <motion.div
@@ -58,6 +61,9 @@ const Index = () => {
   const [currentFact, setCurrentFact] = useState("");
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [factCount, setFactCount] = useState(0);
+  const [catName, setCatName] = useState("");
+  const [showNameDialog, setShowNameDialog] = useState(true);
+  const [confettiActive, setConfettiActive] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -68,7 +74,14 @@ const Index = () => {
     const randomFact = catFacts[Math.floor(Math.random() * catFacts.length)];
     setCurrentFact(randomFact);
     setShowFact(true);
-    setFactCount(prevCount => prevCount + 1);
+    setFactCount(prevCount => {
+      const newCount = prevCount + 1;
+      if (newCount % 5 === 0) {
+        setConfettiActive(true);
+        setTimeout(() => setConfettiActive(false), 3000);
+      }
+      return newCount;
+    });
     toast({
       title: "New Cat Fact!",
       description: "Did you know? Cats are fascinating creatures!",
@@ -78,6 +91,16 @@ const Index = () => {
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
+  };
+
+  const handleNameSubmit = (e) => {
+    e.preventDefault();
+    setShowNameDialog(false);
+    toast({
+      title: "Welcome!",
+      description: `Hello, ${catName}! Let's learn about cats together!`,
+      duration: 3000,
+    });
   };
 
   return (
@@ -101,6 +124,66 @@ const Index = () => {
             {isDarkMode ? <Sun className="h-[1.2rem] w-[1.2rem]" /> : <Moon className="h-[1.2rem] w-[1.2rem]" />}
           </Button>
         </motion.div>
+
+        <Dialog open={showNameDialog} onOpenChange={setShowNameDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Welcome to Feline Fascination!</DialogTitle>
+              <DialogDescription>
+                Before we start, what's your cat's name? (Or your favorite cat name if you don't have one)
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleNameSubmit}>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="name" className="text-right">
+                    Cat Name
+                  </Label>
+                  <Input
+                    id="name"
+                    value={catName}
+                    onChange={(e) => setCatName(e.target.value)}
+                    className="col-span-3"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <Button type="submit">Start Learning</Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {confettiActive && (
+          <div className="fixed inset-0 pointer-events-none z-50">
+            <div className="absolute inset-0 overflow-hidden">
+              <div className="relative w-full h-full">
+                {[...Array(50)].map((_, index) => (
+                  <motion.div
+                    key={index}
+                    className="absolute w-2 h-2 bg-pink-500 rounded-full"
+                    initial={{
+                      x: "50%",
+                      y: "60%",
+                      scale: 0,
+                    }}
+                    animate={{
+                      x: `${Math.random() * 100}%`,
+                      y: `${Math.random() * 100}%`,
+                      scale: [0, 1, 0],
+                    }}
+                    transition={{
+                      duration: 2,
+                      ease: "easeOut",
+                      times: [0, 0.2, 1],
+                      delay: Math.random() * 0.2,
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
         <motion.div
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
@@ -122,7 +205,7 @@ const Index = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
           >
-            Explore the wonderful world of cats!
+            Explore the wonderful world of cats with {catName}!
           </motion.p>
         </motion.div>
 
@@ -236,10 +319,22 @@ const Index = () => {
               onClick={handleShowFact}
               className="bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-6 rounded-full transition duration-300 ease-in-out transform hover:shadow-lg"
             >
-              <Heart className="mr-2" /> Show Cat Fact
+              <Gift className="mr-2" /> Reveal Cat Fact
             </Button>
           </motion.div>
         </div>
+
+        <motion.div
+          className="mb-8 text-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
+        >
+          <p className="text-lg text-gray-700 dark:text-gray-300">
+            <Sparkles className="inline-block mr-2 text-yellow-400" />
+            Each fact you learn brings you closer to becoming a cat expert!
+          </p>
+        </motion.div>
 
         <AnimatePresence>
           {showFact && <CatFact fact={currentFact} />}
